@@ -1,0 +1,365 @@
+### MicroMeals — Exemplos de pedidos HTTP
+### Fluxo completo de ponta a ponta
+### Compatível com REST Client (VS Code) e HTTP Client (IntelliJ)
+
+@customer_url = http://localhost:8001
+@restaurant_url = http://localhost:8002
+@order_url = http://localhost:8003
+@payment_url = http://localhost:8004
+@notification_url = http://localhost:8005
+
+
+# ─────────────────────────────────────────────
+# HEALTH CHECKS
+# ─────────────────────────────────────────────
+
+### customer-service
+GET {{customer_url}}/health
+
+### restaurant-service
+GET {{restaurant_url}}/health
+
+### order-service
+GET {{order_url}}/health
+
+### payment-service
+GET {{payment_url}}/health
+
+### notification-service
+GET {{notification_url}}/health
+
+
+# ─────────────────────────────────────────────
+# PASSO 1 — Criar clientes
+# ─────────────────────────────────────────────
+
+### Criar cliente: Ana Silva
+POST {{customer_url}}/customers
+Content-Type: application/json
+
+{
+  "name": "Ana Silva",
+  "email": "ana.silva@email.com",
+  "address": "Rua das Flores, 10, Lisboa",
+  "phone": "912345678"
+}
+
+### Criar cliente: Bruno Costa
+POST {{customer_url}}/customers
+Content-Type: application/json
+
+{
+  "name": "Bruno Costa",
+  "email": "bruno.costa@email.com",
+  "address": "Avenida da Liberdade, 200, Lisboa",
+  "phone": "961234567"
+}
+
+### Criar cliente: Carla Martins
+POST {{customer_url}}/customers
+Content-Type: application/json
+
+{
+  "name": "Carla Martins",
+  "email": "carla.martins@email.com",
+  "address": "Praça do Comércio, 5, Lisboa",
+  "phone": "931234567"
+}
+
+### Listar clientes
+GET {{customer_url}}/customers
+
+### Consultar cliente por ID
+GET {{customer_url}}/customers/1
+
+
+# ─────────────────────────────────────────────
+# PASSO 2 — Criar restaurantes
+# ─────────────────────────────────────────────
+
+### Criar restaurante: Pizza Byte
+POST {{restaurant_url}}/restaurants
+Content-Type: application/json
+
+{
+  "name": "Pizza Byte",
+  "cuisine_type": "Italiana",
+  "address": "Avenida da República, 50, Lisboa",
+  "active": true
+}
+
+### Criar restaurante: Burger Stack
+POST {{restaurant_url}}/restaurants
+Content-Type: application/json
+
+{
+  "name": "Burger Stack",
+  "cuisine_type": "Americana",
+  "address": "Rua Augusta, 120, Lisboa",
+  "active": true
+}
+
+### Criar restaurante: Sushi Loop
+POST {{restaurant_url}}/restaurants
+Content-Type: application/json
+
+{
+  "name": "Sushi Loop",
+  "cuisine_type": "Japonesa",
+  "address": "Rua do Ouro, 80, Lisboa",
+  "active": true
+}
+
+### Listar restaurantes
+GET {{restaurant_url}}/restaurants
+
+### Consultar restaurante por ID
+GET {{restaurant_url}}/restaurants/1
+
+
+# ─────────────────────────────────────────────
+# PASSO 3 — Criar itens de menu
+# ─────────────────────────────────────────────
+
+### Pizza Byte — Pizza Margherita (8.50€)
+POST {{restaurant_url}}/restaurants/1/menu-items
+Content-Type: application/json
+
+{
+  "name": "Pizza Margherita",
+  "description": "Tomate, mozzarella e manjericão",
+  "price": 8.50,
+  "available": true
+}
+
+### Pizza Byte — Pizza Pepperoni (10.00€)
+POST {{restaurant_url}}/restaurants/1/menu-items
+Content-Type: application/json
+
+{
+  "name": "Pizza Pepperoni",
+  "description": "Tomate, mozzarella e pepperoni",
+  "price": 10.00,
+  "available": true
+}
+
+### Pizza Byte — Ice Tea (2.50€)
+POST {{restaurant_url}}/restaurants/1/menu-items
+Content-Type: application/json
+
+{
+  "name": "Ice Tea",
+  "description": "Ice Tea de limão",
+  "price": 2.50,
+  "available": true
+}
+
+### Burger Stack — Hambúrguer Clássico (9.00€)
+POST {{restaurant_url}}/restaurants/2/menu-items
+Content-Type: application/json
+
+{
+  "name": "Hambúrguer Clássico",
+  "description": "Pão, carne, alface, tomate e queijo",
+  "price": 9.00,
+  "available": true
+}
+
+### Burger Stack — Batatas Fritas (3.50€)
+POST {{restaurant_url}}/restaurants/2/menu-items
+Content-Type: application/json
+
+{
+  "name": "Batatas Fritas",
+  "description": "Batatas fritas crocantes com sal",
+  "price": 3.50,
+  "available": true
+}
+
+### Burger Stack — Cola (2.00€)
+POST {{restaurant_url}}/restaurants/2/menu-items
+Content-Type: application/json
+
+{
+  "name": "Cola",
+  "description": "Refrigerante de cola 330ml",
+  "price": 2.00,
+  "available": true
+}
+
+### Sushi Loop — Sushi Mix (18.00€)
+POST {{restaurant_url}}/restaurants/3/menu-items
+Content-Type: application/json
+
+{
+  "name": "Sushi Mix",
+  "description": "Seleção de 12 peças de sushi variado",
+  "price": 18.00,
+  "available": true
+}
+
+### Listar menu do restaurante 1
+GET {{restaurant_url}}/restaurants/1/menu-items
+
+### Consultar item de menu por ID
+GET {{restaurant_url}}/menu-items/1
+
+
+# ─────────────────────────────────────────────
+# PASSO 4 — Criar encomendas
+# ─────────────────────────────────────────────
+
+### Ana Silva encomenda no Pizza Byte (total ≤ 50€ → pagamento aprovado)
+### 2x Pizza Margherita (8.50€) + 1x Ice Tea (2.50€) = 19.50€
+POST {{order_url}}/orders
+Content-Type: application/json
+
+{
+  "customer_id": 1,
+  "restaurant_id": 1,
+  "items": [
+    { "menu_item_id": 1, "quantity": 2 },
+    { "menu_item_id": 3, "quantity": 1 }
+  ]
+}
+
+### Bruno Costa encomenda no Sushi Loop (total > 50€ → pagamento rejeitado)
+### 3x Sushi Mix (18.00€) = 54.00€
+POST {{order_url}}/orders
+Content-Type: application/json
+
+{
+  "customer_id": 2,
+  "restaurant_id": 3,
+  "items": [
+    { "menu_item_id": 7, "quantity": 3 }
+  ]
+}
+
+### Listar encomendas
+GET {{order_url}}/orders
+
+### Consultar encomenda por ID
+GET {{order_url}}/orders/1
+
+### Listar encomendas da Ana Silva
+GET {{order_url}}/customers/1/orders
+
+
+# ─────────────────────────────────────────────
+# PASSO 5 — Pagar encomenda
+# ─────────────────────────────────────────────
+
+### Pagar encomenda 1 (19.50€) via MBWAY → APPROVED
+POST {{payment_url}}/payments
+Content-Type: application/json
+
+{
+  "order_id": 1,
+  "payment_method": "MBWAY"
+}
+
+### Pagar encomenda 2 (54.00€) via CARD → REJECTED (valor > 50€)
+POST {{payment_url}}/payments
+Content-Type: application/json
+
+{
+  "order_id": 2,
+  "payment_method": "CARD"
+}
+
+### Listar pagamentos
+GET {{payment_url}}/payments
+
+### Consultar pagamento por ID
+GET {{payment_url}}/payments/1
+
+### Consultar pagamentos da encomenda 1
+GET {{payment_url}}/orders/1/payments
+
+
+# ─────────────────────────────────────────────
+# PASSO 6 — Atualizar estado da encomenda
+# ─────────────────────────────────────────────
+
+### Encomenda 1: PAID → PREPARING
+PATCH {{order_url}}/orders/1/status
+Content-Type: application/json
+
+{
+  "status": "PREPARING"
+}
+
+### Encomenda 1: PREPARING → DELIVERED
+PATCH {{order_url}}/orders/1/status
+Content-Type: application/json
+
+{
+  "status": "DELIVERED"
+}
+
+### Cancelar encomenda 2 (CREATED → CANCELLED)
+PATCH {{order_url}}/orders/2/status
+Content-Type: application/json
+
+{
+  "status": "CANCELLED"
+}
+
+
+# ─────────────────────────────────────────────
+# PASSO 7 — Consultar notificações
+# ─────────────────────────────────────────────
+
+### Listar todas as notificações
+GET {{notification_url}}/notifications
+
+### Consultar notificações da Ana Silva (customer_id=1)
+GET {{notification_url}}/customers/1/notifications
+
+### Consultar notificações do Bruno Costa (customer_id=2)
+GET {{notification_url}}/customers/2/notifications
+
+### Consultar notificação por ID
+GET {{notification_url}}/notifications/1
+
+
+# ─────────────────────────────────────────────
+# EXTRAS — Atualizar e eliminar dados
+# ─────────────────────────────────────────────
+
+### Atualizar cliente
+PUT {{customer_url}}/customers/1
+Content-Type: application/json
+
+{
+  "name": "Ana Silva",
+  "email": "ana.silva@email.com",
+  "address": "Rua das Flores, 25, Lisboa",
+  "phone": "912345678"
+}
+
+### Eliminar cliente
+DELETE {{customer_url}}/customers/3
+
+### Atualizar restaurante (desativar)
+PUT {{restaurant_url}}/restaurants/3
+Content-Type: application/json
+
+{
+  "name": "Sushi Loop",
+  "cuisine_type": "Japonesa",
+  "address": "Rua do Ouro, 80, Lisboa",
+  "active": false
+}
+
+### Atualizar item de menu (marcar como indisponível)
+PUT {{restaurant_url}}/menu-items/1
+Content-Type: application/json
+
+{
+  "name": "Pizza Margherita",
+  "description": "Tomate, mozzarella e manjericão",
+  "price": 8.50,
+  "available": false
+}
